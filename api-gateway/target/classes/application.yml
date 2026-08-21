@@ -51,6 +51,14 @@ spring:
           filters:
             - StripPrefix=0
 
+        # Review & Rating Service
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - StripPrefix=0
+
       # Global default filters
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST

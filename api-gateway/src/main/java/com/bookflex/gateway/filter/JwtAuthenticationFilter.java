@@ -78,15 +78,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-
-        // Allow public paths through without authentication
-        if (isPublicPath(path)) {
-            return chain.filter(exchange);
-        }
-
         String authHeader = request.getHeaders().getFirst(AUTHORIZATION_HEADER);
 
+        boolean isPublic = isPublicRequest(request);
+
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            if (isPublic) {
+                return chain.filter(exchange);
+            }
             log.warn("Missing or malformed Authorization header for path: {}", path);
             return unauthorizedResponse(exchange);
         }
@@ -115,6 +114,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         } catch (JwtException e) {
             log.warn("JWT validation failed for path {}: {}", path, e.getMessage());
+            if (isPublic) {
+                return chain.filter(exchange);
+            }
             return unauthorizedResponse(exchange);
         }
     }
@@ -125,8 +127,21 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return -1;
     }
 
-    private boolean isPublicPath(String path) {
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+    private boolean isPublicRequest(ServerHttpRequest request) {
+        String path = request.getURI().getPath();
+        org.springframework.http.HttpMethod method = request.getMethod();
+
+        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
+            return true;
+        }
+
+        // Public GET endpoints for browsing resources & reading reviews
+        if (org.springframework.http.HttpMethod.GET.equals(method) &&
+                (path.startsWith("/api/resources") || path.startsWith("/api/reviews/resource"))) {
+            return true;
+        }
+
+        return false;
     }
 
     private Mono<Void> unauthorizedResponse(ServerWebExchange exchange) {

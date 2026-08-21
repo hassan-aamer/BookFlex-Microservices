@@ -1,0 +1,16 @@
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/ReviewServiceApplication.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/client/BookingClient.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/config/SecurityConfig.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/controller/ReviewController.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/dto/BookingClientDto.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/dto/CreateReviewRequest.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/dto/RatingSummaryResponse.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/dto/ReviewResponse.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/entity/ReviewEntity.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/exception/GlobalExceptionHandler.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/exception/InvalidBookingException.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/exception/ReviewAlreadyExistsException.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/exception/ReviewNotFoundException.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/mapper/ReviewMapper.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/repository/ReviewRepository.java
+/home/hassan/DEV/SpringBoot/BookFlex Microservices/review-service/src/main/java/com/bookflex/review/service/ReviewService.java

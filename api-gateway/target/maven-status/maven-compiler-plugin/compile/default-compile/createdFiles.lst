@@ -1,3 +1,0 @@
-com/bookflex/gateway/config/CorsConfig.class
-com/bookflex/gateway/ApiGatewayApplication.class
-com/bookflex/gateway/filter/JwtAuthenticationFilter.class

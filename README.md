@@ -3,9 +3,10 @@
 ![Java 21](https://img.shields.io/badge/Java-21-orange?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.2-green?logo=springboot)
 ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2023.0.3-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)
 ![Architecture](https://img.shields.io/badge/Architecture-Microservices-purple)
 
-A production-grade, educational microservices system built with Java 21 & Spring Boot 3.3.x.
+A production-grade, enterprise microservices system built with Java 21, Spring Boot 3.3.x, and PostgreSQL 16.
 Designed to handle any type of "bookable resource" (hotel rooms, medical appointments, sports fields) dynamically without modifying core domain logic (**Open/Closed Principle**).
 
 ---
@@ -30,7 +31,8 @@ Designed to handle any type of "bookable resource" (hotel rooms, medical appoint
 * **User Management**: Authentication & Authorization (JWT + Role-Based Access Control: `CUSTOMER`, `PROVIDER`, `ADMIN`).
 * **Resource Management**: Dynamic creation and availability tracking for diverse resource types (`ROOM`, `APPOINTMENT`, `SPORTS_FIELD`).
 * **Booking Lifecycle**: Reservation, payment confirmation, cancellation with time-based refund policy calculation, and completion.
-* **Notifications**: Event-driven email/SMS/log notifications on booking state changes.
+* **Notifications**: Event-driven email/SMS/log notifications on booking state changes via RabbitMQ.
+* **Verified Reviews & Ratings**: Verified post-booking ratings (1-5 stars) and average rating calculation per resource (`review-service`).
 
 ### Non-Functional Requirements
 * **Extensibility**: Add new resource types without modifying existing booking services (Open/Closed Principle).
@@ -44,28 +46,28 @@ Designed to handle any type of "bookable resource" (hotel rooms, medical appoint
 ### System Architecture Diagram
 ```
                           ┌───────────────────────────┐
-                          │   Client / Swagger / UI   │
+                          │   Client / Postman / UI   │
                           └─────────────┬─────────────┘
                                         │
                                         ▼
                           ┌───────────────────────────┐
-                          │   API Gateway (:8080)     │
+                          │   API Gateway (:8088)     │
                           │ (JWT Filter + Routing)    │
                           └─────────────┬─────────────┘
                                         │
-             ┌──────────────────────────┼──────────────────────────┐
-             ▼                          ▼                          ▼
-    ┌─────────────────┐        ┌─────────────────┐        ┌─────────────────┐
-    │  User Service   │        │ Resource Service│        │ Booking Service │
-    │     (:8081)     │        │     (:8082)     │        │     (:8083)     │
-    └────────┬────────┘        └────────┬────────┘        └────────┬────────┘
-             │                          │                          │
-             └──────────────────────────┼──────────────────────────┘
-                                        ▼
-                            ┌───────────────────────┐
-                            │ Eureka Service        │
-                            │ Discovery (:8761)     │
-                            └───────────────────────┘
+             ┌──────────────────────────┼──────────────────────────┬──────────────────────────┐
+             ▼                          ▼                          ▼                          ▼
+    ┌─────────────────┐        ┌─────────────────┐        ┌─────────────────┐        ┌─────────────────┐
+    │  User Service   │        │ Resource Service│        │ Booking Service │        │ Review Service  │
+    │     (:8081)     │        │     (:8082)     │        │     (:8083)     │        │     (:8086)     │
+    └────────┬────────┘        └────────┬────────┘        └────────┬────────┘        └────────┬────────┘
+             │                          │                          │                          │
+             └──────────────────────────┼──────────────────────────┼──────────────────────────┘
+                                        ▼                          ▼
+                            ┌───────────────────────┐   ┌───────────────────────┐
+                            │ Eureka Service        │   │ pgAdmin 4 Dashboard   │
+                            │ Discovery (:8761)     │   │      (:5050)          │
+                            └───────────────────────┘   └───────────────────────┘
                                         │
              ┌──────────────────────────┴──────────────────────────┐
              ▼                                                     ▼
@@ -77,15 +79,17 @@ Designed to handle any type of "bookable resource" (hotel rooms, medical appoint
 
 ### Microservice Registry
 
-| Service | Port | Database | Description |
+| Service | Port | Database (PostgreSQL 16) | Description |
 |---|---|---|---|
 | `discovery-service` | 8761 | None | Netflix Eureka Service Registry |
-| `api-gateway` | 8080 | None | Spring Cloud Gateway, JWT authentication filter, dynamic routing |
-| `user-service` | 8081 | `user_db` | Authentication (JWT), user management, RBAC (`CUSTOMER`, `PROVIDER`, `ADMIN`) |
-| `resource-service` | 8082 | `resource_db` | Core abstraction `BookableResource`, Factory pattern, resource CRUD |
-| `booking-service` | 8083 | `booking_db` | Core booking engine, State & Strategy patterns, Pessimistic Lock, Saga orchestrator |
-| `payment-service` | 8084 | `payment_db` | Mock payment gateway, Dependency Inversion (`PaymentGateway` interface) |
-| `notification-service` | 8085 | `notification_db` | Event listener for RabbitMQ, Interface Segregation (`NotificationSender`) |
+| `api-gateway` | 8088 | None | Spring Cloud Gateway, JWT authentication filter, dynamic routing |
+| `user-service` | 8081 | `bookflex_users` | Authentication (JWT), user management, RBAC (`CUSTOMER`, `PROVIDER`, `ADMIN`) |
+| `resource-service` | 8082 | `bookflex_resources` | Core abstraction `BookableResource`, Factory pattern, resource CRUD |
+| `booking-service` | 8083 | `bookflex_bookings` | Core booking engine, State & Strategy patterns, Pessimistic Lock, Saga orchestrator |
+| `payment-service` | 8084 | `bookflex_payments` | Mock payment gateway, Dependency Inversion (`PaymentGateway` interface) |
+| `notification-service` | 8085 | `bookflex_notifications` | Event listener for RabbitMQ, Interface Segregation (`NotificationSender`) |
+| `review-service` | 8086 | `bookflex_reviews` | Verified ratings (1-5 stars), single review per booking rule, rating aggregations |
+| `pgadmin` | 5050 | PostgreSQL Dashboard | Web administration interface for all PostgreSQL 16 databases |
 
 ---
 
@@ -120,7 +124,7 @@ The `booking-service` **never** imports or references concrete resource types. I
 | **O (Open/Closed)** | `resource-service` & `booking-service` | Added `SportsFieldSlot` without modifying `BookingServiceImpl` or any other microservice. `CancellationPolicy` allows new refund strategies without changing cancellation logic. |
 | **L (Liskov Substitution)** | `com.bookflex.resource.domain.*` | `Room`, `AppointmentSlot`, and `SportsFieldSlot` can be substituted anywhere `BookableResource` is expected without breaking invariants. |
 | **I (Interface Segregation)** | `NotificationSender` & `PaymentGateway` | Fine-grained interfaces. `NotificationSender` has only `send()`, completely decoupled from payment or booking logic. |
-| **D (Dependency Inversion)** | `PaymentService`, `BookingServiceImpl` | High-level services depend on abstractions (`PaymentGateway`, `CancellationPolicy`, `ResourceClient`), not concrete classes. Dependencies are injected via Spring Constructor Injection. |
+| **D (Dependency Inversion)** | `PaymentService`, `BookingServiceImpl`, `ReviewService` | High-level services depend on abstractions (`PaymentGateway`, `CancellationPolicy`, `ResourceClient`, `BookingClient`), not concrete implementations. Dependencies are injected via Spring Constructor Injection. |
 
 ---
 
@@ -143,8 +147,8 @@ The `booking-service` **never** imports or references concrete resource types. I
 * **Why used**: Decouples booking state changes from notification sending via RabbitMQ topic exchanges (`booking.exchange`). When a booking is confirmed/cancelled, event listeners asynchronously consume events.
 
 ### 5. Builder Pattern
-* **Location**: Domain entities and DTOs (via Lombok `@Builder`) & `BookingEntity` creation.
-* **Why used**: Simplifies construction of complex immutable objects (e.g. `BookingEntity`, `TimeSlotDto`) with validated parameters.
+* **Location**: Domain entities and DTOs (via Lombok `@Builder`) & `BookingEntity`, `ReviewEntity` creation.
+* **Why used**: Simplifies construction of complex immutable objects with validated parameters.
 
 ### 6. Template Method
 * **Location**: `BookingServiceImpl.createBooking`
@@ -167,7 +171,8 @@ The `booking-service` **never** imports or references concrete resource types. I
 Centralized exception handling with `@RestControllerAdvice` in each service translating domain exceptions to a standardized `ApiErrorResponse` JSON:
 * `ResourceAlreadyBookedException` -> `409 CONFLICT`
 * `BookingNotFoundException` -> `404 NOT FOUND`
-* `InvalidBookingStateException` -> `400 BAD REQUEST`
+* `ReviewAlreadyExistsException` -> `409 CONFLICT`
+* `InvalidBookingException` -> `400 BAD REQUEST`
 * `PaymentFailedException` -> `402 PAYMENT REQUIRED`
 
 ---
@@ -186,9 +191,6 @@ To prevent two simultaneous users from booking the exact same time slot, `bookin
 """)
 Optional<BookingEntity> findConflictingBookingForUpdate(...);
 ```
-
-### Asynchronous Execution
-Non-critical tasks (event publishing, logging) run on a dedicated thread pool configured in `AsyncConfig` using `@Async`, avoiding UI latency.
 
 ---
 
@@ -219,24 +221,27 @@ Client ──► Booking Service ──► Resource Service (Reserve Slot)
 ### Building & Running with Docker Compose
 ```bash
 # 1. Build all microservice JARs
-mvn clean install -DskipTests
+mvn clean package -DskipTests
 
-# 2. Start all services, databases, and RabbitMQ
-docker-compose up --build
+# 2. Start all services, PostgreSQL 16 databases, pgAdmin 4, and RabbitMQ
+docker compose up -d --build
 ```
+
+### Accessing Dashboards
+* **API Gateway**: `http://localhost:8088`
+* **Eureka Service Registry**: `http://localhost:8761`
+* **pgAdmin 4 Dashboard**: `http://localhost:5050` (Email: `admin@bookflex.com`, Password: `admin`)
+* **RabbitMQ Management**: `http://localhost:15672` (User: `guest`, Password: `guest`)
 
 ---
 
-## 10. Testing & OCP Proof
+## 10. Postman Collection & Testing
 
-### Running Automated Tests
-```bash
-# Execute concurrency test for double booking prevention
-mvn test -pl booking-service -Dtest=ConcurrentBookingTest
+An updated, complete Postman collection is included under [`postman/BookFlex.postman_collection.json`](file:///home/hassan/DEV/SpringBoot/BookFlex%20Microservices/postman/BookFlex.postman_collection.json).
+It includes 5 organized folders with automated test scripts that dynamically save `jwtToken`, `resourceId`, and `bookingId`:
 
-# Execute unit tests for State and Strategy patterns
-mvn test -pl booking-service -Dtest=BookingStateTest,CancellationPolicyTest
-```
-
-### OCP Proof
-`SportsFieldSlot` was added as a new `BookableResource` implementation after `booking-service` was fully written. Zero lines of code in `booking-service` were altered to support this new resource type.
+1. `1. User & Auth Service` (Register Customer, Register Provider, Login, Get Current Profile)
+2. `2. Resource Service` (Create Room, Create Appointment Slot, Create Sports Field Slot, List Resources)
+3. `3. Booking Service` (Create Booking Saga, Get Details, My Bookings, Cancel Booking)
+4. `4. Payment & Notification Services` (Get Payments By Booking, User Notifications)
+5. `5. Review & Rating Service` (Submit Verified Review, List Resource Reviews, Get Rating Summary)

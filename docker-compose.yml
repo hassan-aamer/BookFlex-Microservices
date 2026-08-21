@@ -179,5 +179,23 @@ services:
       discovery-service:
         condition: service_healthy
 
+  review-service:
+    build: ./review-service
+    container_name: bookflex-review
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookflex_reviews
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+
 volumes:
   postgres_data:
