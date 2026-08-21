@@ -10,21 +10,35 @@ services:
 
   # ── Infrastructure ───────────────────────────────────────────────────
 
-  mysql:
-    image: mysql:8.0
-    container_name: bookflex-mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: bookflex-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/init-mysql-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-postgres-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test: ["CMD-SHELL", "pg_isready -U root -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: bookflex-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bookflex.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -73,12 +87,12 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookflex_users?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookflex_users
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
@@ -89,13 +103,13 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookflex_resources?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookflex_resources
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -108,13 +122,13 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookflex_bookings?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookflex_bookings
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -133,13 +147,13 @@ services:
     ports:
       - "8084:8084"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookflex_payments?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookflex_payments
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -152,13 +166,13 @@ services:
     ports:
       - "8085:8085"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookflex_notifications?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookflex_notifications
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -166,4 +180,4 @@ services:
         condition: service_healthy
 
 volumes:
-  mysql_data:
+  postgres_data:
