@@ -101,14 +101,14 @@ public class ResourceController {
         return ResponseEntity.ok(dto);
     }
 
-    @PatchMapping("/{id}/reserve")
+    @PutMapping("/{id}/reserve")
     @Operation(summary = "Reserve a resource (Saga step)")
     public ResponseEntity<Void> reserveResource(@PathVariable String id) {
         resourceService.reserveResource(id);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{id}/release")
+    @PutMapping("/{id}/release")
     @Operation(summary = "Release a resource (Saga compensation)")
     public ResponseEntity<Void> releaseResource(@PathVariable String id) {
         resourceService.releaseResource(id);

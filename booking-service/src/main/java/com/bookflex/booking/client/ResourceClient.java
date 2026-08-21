@@ -3,7 +3,7 @@ package com.bookflex.booking.client;
 import com.bookflex.common.dto.ResourceDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
@@ -19,9 +19,9 @@ public interface ResourceClient {
     @GetMapping("/api/resources/{id}/dto")
     ResourceDto getResourceById(@PathVariable("id") String resourceId);
 
-    @PatchMapping("/api/resources/{id}/reserve")
+    @PutMapping("/api/resources/{id}/reserve")
     void reserveResource(@PathVariable("id") String resourceId);
 
-    @PatchMapping("/api/resources/{id}/release")
+    @PutMapping("/api/resources/{id}/release")
     void releaseResource(@PathVariable("id") String resourceId);
 }
