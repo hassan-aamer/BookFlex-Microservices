@@ -1,0 +1,83 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      # ── Route Definitions ──────────────────────────────────────────────────
+      # Each route maps a path prefix to a Eureka-registered service.
+      # The 'lb://' prefix enables client-side load balancing via Eureka.
+      routes:
+        # User Service (auth + user management)
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**, /api/users/**
+          filters:
+            - StripPrefix=0
+
+        # Resource Service (bookable resources CRUD)
+        - id: resource-service
+          uri: lb://resource-service
+          predicates:
+            - Path=/api/resources/**
+          filters:
+            - StripPrefix=0
+
+        # Booking Service (core booking operations)
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/bookings/**
+          filters:
+            - StripPrefix=0
+
+        # Payment Service
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=0
+
+        # Notification Service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=0
+
+      # Global default filters
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+
+# ── Eureka Client ────────────────────────────────────────────────────────
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+# ── JWT Configuration ────────────────────────────────────────────────────
+# Same secret must be shared with user-service (the token issuer).
+# In production, use a vault or environment variable — never hardcode.
+jwt:
+  secret: Ym9va2ZsZXgtand0LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1sb25nLWZvci1obWFjLXNoYTI1Ng==
+
+# ── Logging ──────────────────────────────────────────────────────────────
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.bookflex.gateway: DEBUG
+
+# ── Management / Actuator ────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway

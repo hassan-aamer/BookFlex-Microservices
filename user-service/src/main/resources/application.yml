@@ -1,0 +1,71 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+  # ── JPA / Datasource (Default: MySQL) ───────────────────────────────
+  datasource:
+    url: jdbc:mysql://localhost:3306/bookflex_users?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+# ── Eureka Client ────────────────────────────────────────────────────────
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# ── JWT Configuration ────────────────────────────────────────────────────
+jwt:
+  secret: Ym9va2ZsZXgtand0LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1sb25nLWZvci1obWFjLXNoYTI1Ng==
+  expiration-ms: 86400000  # 24 hours
+
+# ── Logging ──────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.bookflex.user: DEBUG
+    org.springframework.security: DEBUG
+
+# ── OpenAPI / Swagger ────────────────────────────────────────────────────
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+---
+# ── H2 Profile for Local In-Memory Testing ─────────────────────────────
+spring:
+  config:
+    activate:
+      on-profile: h2
+
+  datasource:
+    url: jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console

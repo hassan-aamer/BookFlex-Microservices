@@ -1,0 +1,418 @@
+{
+	"info": {
+		"_postman_id": "b00kf13x-7777-4444-8888-999999999999",
+		"name": "BookFlex Microservices API",
+		"description": "Complete Postman collection for Generic Bookable Resource System (7 Microservices)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwtToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "resourceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookingId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. User & Auth Service",
+			"item": [
+				{
+					"name": "Register Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@bookflex.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"John Doe\",\n  \"role\": \"CUSTOMER\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Register Provider",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"provider@bookflex.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"Hotel Manager\",\n  \"role\": \"PROVIDER\",\n  \"phoneNumber\": \"+0987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set('jwtToken', jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@bookflex.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Resource Service (OOP & Factory)",
+			"item": [
+				{
+					"name": "Create Room Resource",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set('resourceId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Deluxe Sea View Suite\",\n  \"resourceType\": \"ROOM\",\n  \"description\": \"Luxury suite with balcony\",\n  \"pricePerSlot\": 250.00,\n  \"attributes\": {\n    \"roomNumber\": \"501\",\n    \"capacity\": \"4\",\n    \"floor\": \"5\",\n    \"amenities\": \"WiFi,TV,AC,Jacuzzi\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "resources"]
+						}
+					}
+				},
+				{
+					"name": "Create Appointment Slot",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cardiology Consultation\",\n  \"resourceType\": \"APPOINTMENT\",\n  \"description\": \"30-minute heart health checkup\",\n  \"pricePerSlot\": 120.00,\n  \"attributes\": {\n    \"doctorName\": \"John Smith\",\n    \"specialty\": \"Cardiology\",\n    \"durationMinutes\": \"30\",\n    \"clinicLocation\": \"Building B, Suite 200\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "resources"]
+						}
+					}
+				},
+				{
+					"name": "Create Sports Field Slot (OCP Proof)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Olympic Football Pitch 1\",\n  \"resourceType\": \"SPORTS_FIELD\",\n  \"description\": \"Full-size artificial turf pitch\",\n  \"pricePerSlot\": 80.00,\n  \"attributes\": {\n    \"fieldName\": \"Pitch 1\",\n    \"sport\": \"Football\",\n    \"surface\": \"Artificial Grass\",\n    \"maxPlayers\": \"22\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/resources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "resources"]
+						}
+					}
+				},
+				{
+					"name": "List All Resources",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/resources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "resources"]
+						}
+					}
+				},
+				{
+					"name": "Get Resource By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/resources/{{resourceId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "resources", "{{resourceId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Booking Service (State, Strategy, Saga, Concurrency)",
+			"item": [
+				{
+					"name": "Create Booking (Saga & State Init)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set('bookingId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceId\": \"{{resourceId}}\",\n  \"startTime\": \"2026-09-01T10:00:00\",\n  \"endTime\": \"2026-09-02T10:00:00\",\n  \"cancellationPolicy\": \"PARTIAL_REFUND\",\n  \"notes\": \"Anniversary stay request\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bookings"]
+						}
+					}
+				},
+				{
+					"name": "Get Booking Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bookings", "{{bookingId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get My Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/my",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bookings", "my"]
+						}
+					}
+				},
+				{
+					"name": "Get Resource Bookings Grouped By Date (Collections Demo)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/resource/{{resourceId}}/by-date",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bookings", "resource", "{{resourceId}}", "by-date"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Booking (Strategy Refund Calculation)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Schedule change\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/{{bookingId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "bookings", "{{bookingId}}", "cancel"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Payment & Notification Services",
+			"item": [
+				{
+					"name": "Get Payments By Booking",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/booking/{{bookingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payments", "booking", "{{bookingId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get User Notifications (Observer Result)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/user/123",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notifications", "user", "123"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
