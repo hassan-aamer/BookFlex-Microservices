@@ -16,7 +16,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/init-mysql-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
@@ -58,7 +58,7 @@ services:
     build: ./api-gateway
     container_name: bookflex-gateway
     ports:
-      - "8080:8080"
+      - "8088:8080"
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
     depends_on:
