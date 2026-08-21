@@ -77,6 +77,13 @@ public class JwtTokenProvider {
     }
 
     /**
+     * Extracts the user email from a JWT token.
+     */
+    public String getEmailFromToken(String token) {
+        return parseClaims(token).get("email", String.class);
+    }
+
+    /**
      * Validates a JWT token's signature and expiration.
      */
     public boolean validateToken(String token) {

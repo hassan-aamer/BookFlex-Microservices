@@ -47,11 +47,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = extractJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-                String userId = jwtTokenProvider.getUserIdFromToken(jwt);
+                String email = jwtTokenProvider.getEmailFromToken(jwt);
 
                 // Load user details to populate the security context with authorities
-                UserDetails userDetails = userDetailsService.loadUserByUsername(
-                        getUserEmailFromUserId(userId));
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -75,17 +74,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(BEARER_PREFIX.length());
         }
         return null;
-    }
-
-    /**
-     * When a JWT is validated, the subject is the user ID. We need to resolve
-     * the email to load UserDetails. In a production system, you'd cache this
-     * or use a dedicated UserDetails-by-ID lookup.
-     */
-    private String getUserEmailFromUserId(String userId) {
-        // The JwtTokenProvider stores email as a claim, but UserDetailsService
-        // loads by email. For simplicity, we load by ID directly via repository.
-        // This is resolved in the service layer.
-        return userId;
     }
 }
