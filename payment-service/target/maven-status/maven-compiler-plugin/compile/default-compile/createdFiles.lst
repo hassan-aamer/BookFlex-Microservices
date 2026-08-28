@@ -2,7 +2,7 @@ com/bookflex/payment/entity/PaymentEntity$PaymentEntityBuilder.class
 com/bookflex/payment/gateway/MockPaymentGateway.class
 com/bookflex/payment/entity/PaymentEntity.class
 com/bookflex/payment/gateway/PaymentGateway.class
-com/bookflex/payment/service/PaymentService.class
 com/bookflex/payment/PaymentServiceApplication.class
+com/bookflex/payment/service/PaymentService.class
 com/bookflex/payment/controller/PaymentController.class
 com/bookflex/payment/repository/PaymentRepository.class

@@ -9,13 +9,13 @@ com/bookflex/review/entity/ReviewEntity.class
 com/bookflex/review/dto/BookingClientDto$BookingClientDtoBuilder.class
 com/bookflex/review/entity/ReviewEntity$ReviewEntityBuilder.class
 com/bookflex/review/client/BookingClient.class
-com/bookflex/review/dto/ReviewResponse$ReviewResponseBuilder.class
 com/bookflex/review/repository/ReviewRepository.class
 com/bookflex/review/controller/ReviewController.class
+com/bookflex/review/dto/ReviewResponse$ReviewResponseBuilder.class
 com/bookflex/review/dto/CreateReviewRequest.class
-com/bookflex/review/exception/ReviewNotFoundException.class
-com/bookflex/review/dto/RatingSummaryResponse$RatingSummaryResponseBuilder.class
 com/bookflex/review/mapper/ReviewMapper.class
+com/bookflex/review/dto/RatingSummaryResponse$RatingSummaryResponseBuilder.class
+com/bookflex/review/exception/ReviewNotFoundException.class
 com/bookflex/review/config/SecurityConfig.class
 com/bookflex/review/exception/InvalidBookingException.class
 com/bookflex/review/exception/GlobalExceptionHandler.class
